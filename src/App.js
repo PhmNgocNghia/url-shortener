@@ -47,7 +47,7 @@ const App = () => {
           name="url"
           id="url"
           required
-          className="block w-full border border-grey rounded px-5 py-4 text-center text-grey-darkest bg-grey-lightest focus:bg-white focus:outline-none focus:shadow-outline"
+          className="block w-full border border-grey rounded px-5 py-4 text-sm text-center text-grey-darkest bg-grey-lightest focus:bg-white focus:outline-none focus:shadow-outline"
           disabled={loading}
         />
         {shortUrl && (
@@ -55,7 +55,7 @@ const App = () => {
             ref={shortLinkRef}
             type="url"
             readOnly
-            className="block w-full border border-grey rounded px-5 py-4 text-center text-grey-darkest bg-grey-light focus:bg-white focus:outline-none focus:shadow-outline mt-4"
+            className="block w-full border border-grey rounded px-5 py-4 text-sm text-center text-grey-darkest bg-grey-light focus:bg-white focus:outline-none focus:shadow-outline mt-4"
             value={loading ? '...' : shortUrl}
             onFocus={onShortLinkFocus}
           />
