@@ -8,6 +8,7 @@ yarn-error.log*
 
 # production build
 /dist
+/.functions
 
 # misc
 .DS_Store
