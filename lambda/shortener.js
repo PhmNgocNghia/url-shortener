@@ -34,36 +34,17 @@ exports.handler = async function(event, context, callback) {
     return;
   }
 
-  // try {
-  //   await validateUrl(body.url);
-  //   const path = await getPath();
-  //   const redirect = buildRedirect(path, body.url);
-  //   await saveRedirect(s3Bucket, redirect);
-  //   respond({
-  //     body: { message: 'success', shortenedUrl: getShortenedUrl(path) },
-  //   });
-  // } catch (e) {
-  //   console.log(e);
-  //   respond({ status: e.statusCode || 500, body: { message: e.message } });
-  // }
-
-  validateUrl(body.url)
-    .then(() => getPath())
-    .then(path => buildRedirect(path, body.url))
-    .then(redirect => saveRedirect(s3Bucket, redirect))
-    .then(redirect =>
-      respond({
-        status: 200,
-        body: {
-          message: 'success',
-          shortenedUrl: getShortenedUrl(redirect.WebsiteRedirectLocation),
-        },
-      }),
-    )
-    .catch(e => {
-      // respond({ status: e.statusCode || 500, body: { message: e.message } });
-      respond({ status: 500, body: { message: e.message } });
+  try {
+    await validateUrl(body.url);
+    const path = await getPath();
+    const redirect = buildRedirect(path, body.url);
+    await saveRedirect(s3Bucket, redirect);
+    respond({
+      body: { message: 'success', shortenedUrl: getShortenedUrl(path) },
     });
+  } catch (e) {
+    respond({ status: e.statusCode || 500, body: { message: e.message } });
+  }
 };
 
 function getShortenedUrl(objectPath = '') {
@@ -109,7 +90,6 @@ function buildRedirect(path, longUrl) {
   let redirect = {
     Bucket: config.BUCKET,
     Key: path,
-    ACL: 'public-read',
   };
   if (longUrl) {
     redirect['WebsiteRedirectLocation'] = longUrl;
