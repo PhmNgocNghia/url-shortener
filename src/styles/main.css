@@ -25,3 +25,7 @@ body {
   box-sizing: inherit;
   margin: 0;
 }
+
+button[disabled] {
+  opacity: .6;
+}

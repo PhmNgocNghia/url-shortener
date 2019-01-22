@@ -15,8 +15,8 @@
   "dependencies": {
     "@loadable/component": "^5.0.1",
     "ky": "^0.7.0",
-    "react": "^16.7.0-alpha.2",
-    "react-dom": "^16.7.0-alpha.2"
+    "react": "^16.8.0-alpha.1",
+    "react-dom": "^16.8.0-alpha.1"
   },
   "devDependencies": {
     "@poi/plugin-bundle-report": "^10.0.1",
