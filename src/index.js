@@ -8,8 +8,8 @@ const init = () => {
   window.addEventListener(
     'load',
     () => {
-      // lambda cold-start ping
-      ky.get('/.netlify/functions/ping');
+      // cold-start ping
+      ky.post('/.netlify/functions/shortener', { json: { ping: true } });
     },
     false,
   );

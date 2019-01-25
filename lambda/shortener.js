@@ -26,10 +26,16 @@ exports.handler = async function(event, context, callback) {
   };
 
   const body = JSON.parse(event.body);
+  // handle ping
+  if (body && body.ping) {
+    respond({ body: { message: 'success' } });
+    return;
+  }
+  // ensures url is present
   if (!body || !body.url) {
     respond({
       status: 400,
-      body: 'Invalid request',
+      body: { message: 'Invalid request' },
     });
     return;
   }
