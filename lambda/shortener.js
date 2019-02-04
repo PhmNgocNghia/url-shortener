@@ -1,20 +1,9 @@
-const url = require('url');
-const AWS = require('aws-sdk');
-
-AWS.config = new AWS.Config({
-  accessKeyId: process.env.AWS_S3_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_S3_SECRET_ACCESS_KEY,
-  region: process.env.AWS_S3_REGION,
-});
-
-const config = {
-  BUCKET: process.env.AWS_S3_BUCKET,
-  REGION: process.env.AWS_S3_REGION,
-};
-
-const s3Bucket = new AWS.S3({
-  params: { Bucket: config.BUCKET },
-});
+import url from 'url';
+import {
+  getOriginUrlInfo,
+  isShortenedUrlAvailable,
+  saveGenerateUrl,
+} from '../lambda_utils/database';
 
 exports.handler = async function(event, context, callback) {
   // helper
@@ -42,22 +31,26 @@ exports.handler = async function(event, context, callback) {
 
   try {
     await validateUrl(body.url);
-    const path = await getPath();
-    const redirect = buildRedirect(path, body.url);
-    await saveRedirect(s3Bucket, redirect);
-    respond({
-      body: { message: 'success', shortenedUrl: getShortenedUrl(path) },
-    });
+    const originUrlInfo = await getOriginUrlInfo(body.url);
+    console.log(originUrlInfo)
+    if (originUrlInfo) {
+      respond({
+        body: { message: 'success', shortenedUrl: originUrlInfo.shortenedUrl },
+      });
+    } else {
+      const shortenedUrl = await generateShortenedUrl();
+      await saveGenerateUrl({
+        originUrl: body.url,
+        shortenedUrl,
+      });
+      respond({
+        body: { message: 'success', shortenedUrl },
+      });
+    }
   } catch (e) {
     respond({ status: e.statusCode || 500, body: { message: e.message } });
   }
 };
-
-function getShortenedUrl(objectPath = '') {
-  const { BUCKET: bucket, REGION: region } = config;
-  const baseUrl = `http://${bucket}.s3-website-${region}.amazonaws.com`;
-  return baseUrl + '/' + objectPath;
-}
 
 function validateUrl(longUrl) {
   return new Promise((resolve, reject) => {
@@ -81,59 +74,22 @@ function validateUrl(longUrl) {
   });
 }
 
-function generatePath(path = '') {
+function generateUrl(Url = '') {
   let characters =
     'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let position = Math.floor(Math.random() * characters.length);
   let character = characters.charAt(position);
-  if (path.length === 7) {
-    return path;
+  if (Url.length === 7) {
+    return Url;
   }
-  return generatePath(path + character);
+  return generateUrl(Url + character);
 }
 
-function buildRedirect(path, longUrl) {
-  let redirect = {
-    Bucket: config.BUCKET,
-    Key: path,
-  };
-  if (longUrl) {
-    redirect['WebsiteRedirectLocation'] = longUrl;
-  }
-  return redirect;
-}
-
-function saveRedirect(bucket, redirect) {
-  return new Promise((resolve, reject) => {
-    bucket.putObject(redirect, (err, data) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      resolve(redirect);
-    });
-  });
-}
-
-function isPathFree(path) {
-  return s3Bucket
-    .headObject(buildRedirect(path))
-    .promise()
-    .then(() => Promise.resolve(false))
-    .catch(function(err) {
-      if (err.code === 'NotFound') {
-        return Promise.resolve(true);
-      } else {
-        return Promise.reject(err);
-      }
-    });
-}
-
-function getPath() {
-  return new Promise(function(resolve, reject) {
-    let path = generatePath();
-    isPathFree(path).then(function(isFree) {
-      return isFree ? resolve(path) : resolve(getPath());
+function generateShortenedUrl() {
+  return new Promise(function(resolve) {
+    let shortenedURL = generateUrl();
+    isShortenedUrlAvailable(shortenedURL).then(function(isFree) {
+      return isFree ? resolve(shortenedURL) : resolve(generateShortenedUrl());
     });
   });
 }

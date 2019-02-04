@@ -13,7 +13,7 @@ const App = () => {
       const { shortenedUrl } = await ky
         .post('/.netlify/functions/shortener', { json: { url } })
         .json();
-      setShortUrl(shortenedUrl);
+      setShortUrl(`${window.location.href}unshortener/${shortenedUrl}`);
     } catch (e) {
       alert('Something went wrong in the process, please try again.');
     } finally {
