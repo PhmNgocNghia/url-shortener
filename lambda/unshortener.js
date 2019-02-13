@@ -1,4 +1,4 @@
-import { getShortenedUrlInfo } from '../lambda_utils/database';
+import { getShortenedUrlInfo } from './lambda_utils/database';
 
 exports.handler = async function(event, context, callback) {
   // helper
