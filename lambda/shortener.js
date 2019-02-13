@@ -3,7 +3,7 @@ import {
   getOriginUrlInfo,
   isShortenedUrlAvailable,
   saveGenerateUrl,
-} from '../lambda_utils/database';
+} from './lambda_utils/database';
 
 exports.handler = async function(event, context, callback) {
   // helper
