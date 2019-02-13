@@ -1,8 +1,9 @@
 [build]
-  command = 'yarn build && yarn build:lambda'
-  publish = 'dist'
-  functions = '.functions'
+  command = "yarn build && yarn build:lambda"
+  publish = "dist"
+  functions = ".functions"
 
 [[redirects]]
-  from='/unshortener/:shortenedUrl'
-  to='/.netlify/functions/unshortener?shortenedUrl=:shortenedUrl'
+  from="/unshortener/*"
+  to="/.netlify/functions/unshortener?shortenedUrl=:splat"
+  force = true
